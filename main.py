@@ -1,6 +1,8 @@
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from agent import generate_email_reply
+import uvicorn
 
 app = FastAPI()
 
@@ -19,3 +21,7 @@ def generate_reply(req: EmailRequest):
         "email_text": req.email_text,
         "reply": reply
     }
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)

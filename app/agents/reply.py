@@ -3,22 +3,33 @@ import requests
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-def generate_reply(email: str, intent: str, tone: str) -> str:
+
+def generate_reply(email: str, intent: str, tone: str):
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent?key={API_KEY}"
 
-    prompt = f"Reply to this email: {email}"
+    prompt = f"""
+    You are an AI email assistant.
 
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}]
-    }
+    Email:
+    {email}
 
-    res = requests.post(url, json=body).json()
+    Generate a short professional reply.
+    Keep it clear and polite.
+    """
 
-    # 🔥 DEBUG PRINT
-    print("Reply API Response:", res)
+    try:
+        res = requests.post(url, json={
+            "contents": [{"parts": [{"text": prompt}]}]
+        })
 
-    # ✅ SAFE CHECK
-    if "candidates" not in res:
-        return "Sorry, unable to generate reply right now."
+        data = res.json()
+        print("REPLY DEBUG:", data)
 
-    return res["candidates"][0]["content"]["parts"][0]["text"].strip()
+        if "candidates" not in data:
+            return "I will get back to you shortly."
+
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    except Exception as e:
+        print("Reply error:", e)
+        return "Unable to generate reply"
